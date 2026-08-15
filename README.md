@@ -7,6 +7,9 @@ DeepSeek Harness（DSH）的 Todo 门禁与提示插件：在 `agent/turn-stoppi
 「长期不更新 Todo」给出建议性提示。三个阈值均可在 Web 设置页配置，保存后下一轮
 立即生效。
 
+> 本插件属于 [dsh-plugins](https://github.com/DoiiarX/dsh-plugins) 合集，
+> 完整的自研插件索引见该仓库。
+
 ## 功能
 
 1. **停止门禁**：当前 turn 存在未完成、且不以「等待用户」前缀开头的 todo 时，

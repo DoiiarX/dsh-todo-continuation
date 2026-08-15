@@ -8,6 +8,9 @@ snapshot and decides whether the turn may stop, plus two advisory prompts for
 "no todo for a while" and "todo not updated for a while". All three thresholds
 are editable in the web settings page and take effect on the next turn.
 
+> Part of the [dsh-plugins](https://github.com/DoiiarX/dsh-plugins) collection —
+> see that repository for the full index of self-built plugins.
+
 ## Features
 
 1. **Stop gate**: when the current turn has unfinished todos that do not start
