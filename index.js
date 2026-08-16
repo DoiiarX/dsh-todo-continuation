@@ -1,7 +1,7 @@
 /**
- * @local/dsh-todo-continuation —— Todo 停止门禁 + 提示插件（host 级）。
+ * @doiiarx/dsh-todo-continuation —— Todo 停止门禁 + 提示插件（host 级）。
  *
- * 双面包（与 @local/dsh-user-language 同一套工作模式）：
+ * 双面包（与 @doiiarx/dsh-user-language 同一套工作模式）：
  *   - 宿主端（本文件）：注册 `todo-continuation` settings 命名空间
  *     （`waitingTodoPrefixes` / `noTodoPromptEveryNTurns` /
  *     `staleTodoPromptEveryNTurns`），监听 `agent/turn-stopping`，实现：
@@ -15,7 +15,7 @@
  * apply() 里动态 import，任何失败降级为诊断日志，不会拖垮整个 profile。
  */
 
-export const name = 'pn-todo-continuation'
+export const name = 'todo-continuation-supervisor'
 export const inject = ['settings']
 
 const SETTINGS_NS = 'todo-continuation'
@@ -26,8 +26,8 @@ const DEFAULT_STALE_EVERY = 20
 
 function report(ctx, scope, error) {
   const detail = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
-  const message = `[pn-todo-continuation] ${scope} unavailable: ${detail}`
-  const logger = ctx.root?.logger?.('pn-todo-continuation')
+  const message = `[todo-continuation] ${scope} unavailable: ${detail}`
+  const logger = ctx.root?.logger?.('todo-continuation')
   if (logger?.error) logger.error('%s', message)
   console.error(message)
 }
@@ -99,16 +99,22 @@ function readConfig(scope) {
 }
 
 export async function apply(ctx, config = {}) {
+  console.log('[todo-continuation] apply() invoked, inject settings =', ctx.get('settings') !== undefined)
   // 1) 注册可持久化的 settings 命名空间（用户在设置页编辑它）。
   let scope
   try {
     const { default: Schema } = await import('schemastery')
+    const base = {
+      waitingTodoPrefixes: config.waitingTodoPrefixes ?? DEFAULT_WAITING_PREFIXES,
+      noTodoPromptEveryNTurns: config.noTodoPromptEveryNTurns ?? DEFAULT_NO_TODO_EVERY,
+      staleTodoPromptEveryNTurns: config.staleTodoPromptEveryNTurns ?? DEFAULT_STALE_EVERY,
+    }
     scope = ctx.settings.register(SETTINGS_NS, Schema.object({
-      waitingTodoPrefixes: Schema.array(Schema.string())
-        .default([...(config.waitingTodoPrefixes ?? DEFAULT_WAITING_PREFIXES)]),
-      noTodoPromptEveryNTurns: Schema.number().default(config.noTodoPromptEveryNTurns ?? DEFAULT_NO_TODO_EVERY),
-      staleTodoPromptEveryNTurns: Schema.number().default(config.staleTodoPromptEveryNTurns ?? DEFAULT_STALE_EVERY),
-    }), { base: {} })
+      waitingTodoPrefixes: Schema.array(Schema.string()).default(base.waitingTodoPrefixes),
+      noTodoPromptEveryNTurns: Schema.number().default(base.noTodoPromptEveryNTurns),
+      staleTodoPromptEveryNTurns: Schema.number().default(base.staleTodoPromptEveryNTurns),
+    }), { base })
+    console.log('[todo-continuation] settings namespace registered OK, scope =', scope !== undefined)
   } catch (error) {
     report(ctx, 'settings', error)
     scope = null

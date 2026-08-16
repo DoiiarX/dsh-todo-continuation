@@ -30,7 +30,7 @@ DeepSeek Harness（DSH）的 Todo 门禁与提示插件：在 `agent/turn-stoppi
   `apply()` 里动态 import，失败降级为诊断日志。
 - `client.js`（浏览器端）：在设置页渲染「Todo 门禁」小节，编辑三个字段。
 - `cordis.patch.yml`：声明 `pn-todo-continuation` 插件行。
-- `package.json`：`@local/dsh-todo-continuation` 包清单，声明 `dsh.client` 注入与
+- `package.json`：`@doiiarx/dsh-todo-continuation` 包清单，声明 `dsh.client` 注入与
   `schemastery` 依赖。
 
 ## 安装接线
@@ -49,12 +49,12 @@ pnpm install
 ```json
 {
   "dependencies": {
-    "@local/dsh-todo-continuation": "link:<本插件目录绝对路径>"
+    "@doiiarx/dsh-todo-continuation": "link:<本插件目录绝对路径>"
   },
   "dsh": {
     "profile": {
       "bundles": [
-        "@local/dsh-todo-continuation"
+        "@doiiarx/dsh-todo-continuation"
       ]
     }
   }

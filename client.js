@@ -1,15 +1,15 @@
 /**
- * @local/dsh-todo-continuation —— 浏览器设置页（Todo 门禁小节）。
- * 与 @local/dsh-user-language 的 client.js 同一套加载模式：
+ * @doiiarx/dsh-todo-continuation —— 浏览器设置页（Todo 门禁小节）。
+ * 与 @doiiarx/dsh-user-language 的 client.js 同一套加载模式：
  * `window.__ModuleLoader__.load` 注册浏览器端插件，绑定 `todo-continuation`
  * settings 命名空间，在设置页渲染三个可编辑字段。保存后宿主端下一轮
  * turn-stopping 即按新值生效，无需重启。
  */
 window.__ModuleLoader__.load({
-  id: "@local/dsh-todo-continuation",
+  id: "@doiiarx/dsh-todo-continuation",
   factory: (require) => {
     const React = require("react");
-    const inject = ["slots", "settingsScope"];
+    const inject = ["slots", "settingsScope", "connection", "remote"];
     const h = React.createElement;
 
     const NAMESPACE = "todo-continuation";

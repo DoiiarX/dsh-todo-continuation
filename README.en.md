@@ -36,7 +36,7 @@ interval so the model is not nagged every turn.
 - `client.js` (browser): renders a "Todo gate" section in the settings page for
   editing the three fields.
 - `cordis.patch.yml`: declares the `pn-todo-continuation` plugin row.
-- `package.json`: the `@local/dsh-todo-continuation` manifest with the
+- `package.json`: the `@doiiarx/dsh-todo-continuation` manifest with the
   `dsh.client` injection and the `schemastery` dependency.
 
 ## Installation
@@ -56,12 +56,12 @@ In `$HOME/.dsh/profiles/web/package.json`:
 ```json
 {
   "dependencies": {
-    "@local/dsh-todo-continuation": "link:<absolute-path-to-this-directory>"
+    "@doiiarx/dsh-todo-continuation": "link:<absolute-path-to-this-directory>"
   },
   "dsh": {
     "profile": {
       "bundles": [
-        "@local/dsh-todo-continuation"
+        "@doiiarx/dsh-todo-continuation"
       ]
     }
   }
