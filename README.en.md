@@ -35,7 +35,7 @@ interval so the model is not nagged every turn.
   degrades to a diagnostic log.
 - `client.js` (browser): renders a "Todo gate" section in the settings page for
   editing the three fields.
-- `cordis.patch.yml`: declares the `pn-todo-continuation` plugin row.
+- `cordis.patch.yml`: declares the `dsh-todo-continuation` plugin row.
 - `package.json`: the `@doiiarx/dsh-todo-continuation` manifest with the
   `dsh.client` injection and the `schemastery` dependency.
 
