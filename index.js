@@ -15,14 +15,26 @@
  * apply() 里动态 import，任何失败降级为诊断日志，不会拖垮整个 profile。
  */
 
+import z from '@deepseek-ai/schemastery'
+
 export const name = 'todo-continuation-supervisor'
 export const inject = ['settings']
 
-const SETTINGS_NS = 'todo-continuation'
 const PLUGIN_SOURCE = { kind: 'plugin', plugin: 'todo-continuation' }
 const DEFAULT_WAITING_PREFIXES = ['信息不足：', '要求用户确认：']
 const DEFAULT_NO_TODO_EVERY = 5
 const DEFAULT_STALE_EVERY = 20
+
+/**
+ * 插件配置，同时就是设置页中的 section：0.2 起 settings 段由 entry 的配置派生
+ * （不再是插件注册 namespace + schema）。改动写入 settings.yaml，Loader 重新
+ * 解析后本插件 reload，因此 apply 拿到的 config 始终是最新值。
+ */
+export const Config = z.object({
+  waitingTodoPrefixes: z.array(z.string()).default([...DEFAULT_WAITING_PREFIXES]),
+  noTodoPromptEveryNTurns: z.number().default(DEFAULT_NO_TODO_EVERY),
+  staleTodoPromptEveryNTurns: z.number().default(DEFAULT_STALE_EVERY),
+})
 
 function report(ctx, scope, error) {
   const detail = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
@@ -83,9 +95,8 @@ function steerMessage(text) {
   }
 }
 
-/** 读取并归一化 settings 里的三个配置值。 */
-function readConfig(scope) {
-  const value = scope?.get?.() ?? {}
+/** 读取并归一化插件配置里的三个值（0.2：配置即 settings section）。 */
+function readConfig(value = {}) {
   const prefixes = Array.isArray(value.waitingTodoPrefixes) && value.waitingTodoPrefixes.length > 0
     ? value.waitingTodoPrefixes.map(prefix => String(prefix))
     : [...DEFAULT_WAITING_PREFIXES]
@@ -99,25 +110,14 @@ function readConfig(scope) {
 }
 
 export async function apply(ctx, config = {}) {
-  console.log('[todo-continuation] apply() invoked, inject settings =', ctx.get('settings') !== undefined)
-  // 1) 注册可持久化的 settings 命名空间（用户在设置页编辑它）。
-  let scope
+  console.log('[todo-continuation] apply() invoked (config-driven settings, 0.2)')
+  // 1) settings 策略：本插件自带设置页（client.js），故关闭自动生成的表单。
   try {
-    const { default: Schema } = await import('schemastery')
-    const base = {
-      waitingTodoPrefixes: config.waitingTodoPrefixes ?? DEFAULT_WAITING_PREFIXES,
-      noTodoPromptEveryNTurns: config.noTodoPromptEveryNTurns ?? DEFAULT_NO_TODO_EVERY,
-      staleTodoPromptEveryNTurns: config.staleTodoPromptEveryNTurns ?? DEFAULT_STALE_EVERY,
-    }
-    scope = ctx.settings.register(SETTINGS_NS, Schema.object({
-      waitingTodoPrefixes: Schema.array(Schema.string()).default(base.waitingTodoPrefixes),
-      noTodoPromptEveryNTurns: Schema.number().default(base.noTodoPromptEveryNTurns),
-      staleTodoPromptEveryNTurns: Schema.number().default(base.staleTodoPromptEveryNTurns),
-    }), { base })
-    console.log('[todo-continuation] settings namespace registered OK, scope =', scope !== undefined)
+    ctx.inject(['settings'], (child) => {
+      child.effect(() => child.settings.configure({ auto: false }, ctx.fiber))
+    })
   } catch (error) {
-    report(ctx, 'settings', error)
-    scope = null
+    report(ctx, 'settings-policy', error)
   }
 
   // 2) 每个 session 的提示状态（turn 去重 + 两条独立计数 + 各自冷却）。
@@ -129,7 +129,7 @@ export async function apply(ctx, config = {}) {
 
   ctx.on('agent/turn-stopping', ({ agent, turn, signal }) => {
     signal.throwIfAborted()
-    const cfg = readConfig(scope)
+    const cfg = readConfig(config)
     const todos = currentTurnTodos(agent.session, turn)
     if (todos !== undefined) {
       // 本轮写了 todo：结束两条计数，记录最近一次写入轮。
