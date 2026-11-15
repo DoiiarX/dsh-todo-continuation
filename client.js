@@ -9,7 +9,7 @@ window.__ModuleLoader__.load({
   id: "@doiiarx/dsh-todo-continuation",
   factory: (require) => {
     const React = require("react");
-    const inject = ["slots", "settingsScope", "connection", "remote"];
+    const inject = ["slots", "configForms", "connection", "remote"];
     const h = React.createElement;
 
     const NAMESPACE = "todo-continuation";
@@ -26,6 +26,9 @@ window.__ModuleLoader__.load({
         () => scope.getSnapshot(),
       );
       const value = snapshot.value;
+      // 'unavailable' 表示宿主没把这个 namespace 暴露给客户端（entry 不在
+      // describe 里，通常因为 Config 缺少 volatile），与仍在加载区分开。
+      const unavailable = snapshot.status === "unavailable";
       const busy = snapshot.status !== "ready" || value === undefined;
       const current = {
         noTodo: numberValue(value?.noTodoPromptEveryNTurns, DEFAULT_NO_TODO_EVERY),
@@ -68,7 +71,8 @@ window.__ModuleLoader__.load({
           h("p", { style: { margin: 0, color: "var(--dsw-alias-label-secondary)" } },
             "控制模型使用 Todo 列表的方式：未完成工作不放行结束，长期不用或不更新 Todo 列表时给出建议性提示。")
         ),
-        busy ? h("p", { style: { color: "var(--dsw-alias-label-secondary)" } }, "正在读取配置…")
+        unavailable ? h("p", { style: { color: "var(--dsw-alias-label-secondary)" } }, "宿主未暴露本设置：插件 Config 缺少 volatile 元数据，或插件未处于活动状态。")
+          : busy ? h("p", { style: { color: "var(--dsw-alias-label-secondary)" } }, "正在读取配置…")
           : h(React.Fragment, null,
             numberField("无 Todo 提示间隔", "连续多少轮没有任何 Todo 后，提示模型开始用 Todo 管理任务。", "noTodoPromptEveryNTurns", current.noTodo),
             numberField("过期 Todo 提示间隔", "已有 Todo 列表却连续多少轮不更新后，提示模型保持列表最新。", "staleTodoPromptEveryNTurns", current.stale),
@@ -105,7 +109,7 @@ window.__ModuleLoader__.load({
     }
 
     function apply(ctx) {
-      const scope = ctx.settingsScope.bind({ namespace: NAMESPACE });
+      const scope = ctx.configForms.get(NAMESPACE);
       ctx.slots.inject("settings.section", () =>
         ctx.slots.register({
           name: "settings.section",

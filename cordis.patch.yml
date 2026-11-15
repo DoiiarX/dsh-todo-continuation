@@ -1,3 +1,3 @@
 - insert:
-    - id: todo-continuation-local
+    - id: todo-continuation
       name: '@doiiarx/dsh-todo-continuation'

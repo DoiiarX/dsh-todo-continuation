@@ -20,20 +20,21 @@ import z from '@deepseek-ai/schemastery'
 export const name = 'todo-continuation-supervisor'
 export const inject = ['settings']
 
-const PLUGIN_SOURCE = { kind: 'plugin', plugin: 'todo-continuation' }
+const PLUGIN_SOURCE = { kind: 'plugin:todo-continuation' }
 const DEFAULT_WAITING_PREFIXES = ['信息不足：', '要求用户确认：']
 const DEFAULT_NO_TODO_EVERY = 5
 const DEFAULT_STALE_EVERY = 20
 
 /**
  * 插件配置，同时就是设置页中的 section：0.2 起 settings 段由 entry 的配置派生
- * （不再是插件注册 namespace + schema）。改动写入 settings.yaml，Loader 重新
- * 解析后本插件 reload，因此 apply 拿到的 config 始终是最新值。
+ * （不再是插件注册 namespace + schema）。改动写入 profile 后 Loader 重新解析并
+ * reload 本插件，因此 apply 拿到的 config 始终是最新值。
  */
 export const Config = z.object({
-  waitingTodoPrefixes: z.array(z.string()).default([...DEFAULT_WAITING_PREFIXES]),
-  noTodoPromptEveryNTurns: z.number().default(DEFAULT_NO_TODO_EVERY),
-  staleTodoPromptEveryNTurns: z.number().default(DEFAULT_STALE_EVERY),
+  // volatile 是设置页读写这些字段的前提（settings 只暴露 volatile 字段）。
+  waitingTodoPrefixes: z.array(z.string()).default([...DEFAULT_WAITING_PREFIXES]).extra('volatile', true),
+  noTodoPromptEveryNTurns: z.number().default(DEFAULT_NO_TODO_EVERY).extra('volatile', true),
+  staleTodoPromptEveryNTurns: z.number().default(DEFAULT_STALE_EVERY).extra('volatile', true),
 })
 
 function report(ctx, scope, error) {
