@@ -13,8 +13,9 @@ window.__ModuleLoader__.load({
     const h = React.createElement;
 
     const NAMESPACE = "todo-continuation";
-    const DEFAULT_NO_TODO_EVERY = 5;
-    const DEFAULT_STALE_EVERY = 20;
+    // 计数单位是 step（一次模型调用）：本机一轮约 16 个 step，64 步≈4 轮。
+    const DEFAULT_NO_TODO_STEPS = 64;
+    const DEFAULT_STALE_STEPS = 256;
 
     function numberValue(value, fallback) {
       return Number.isSafeInteger(value) && value >= 1 ? value : fallback;
@@ -31,8 +32,8 @@ window.__ModuleLoader__.load({
       const unavailable = snapshot.status === "unavailable";
       const busy = snapshot.status !== "ready" || value === undefined;
       const current = {
-        noTodo: numberValue(value?.noTodoPromptEveryNTurns, DEFAULT_NO_TODO_EVERY),
-        stale: numberValue(value?.staleTodoPromptEveryNTurns, DEFAULT_STALE_EVERY),
+        noTodo: numberValue(value?.noTodoPromptEveryNSteps, DEFAULT_NO_TODO_STEPS),
+        stale: numberValue(value?.staleTodoPromptEveryNSteps, DEFAULT_STALE_STEPS),
         prefixes: Array.isArray(value?.waitingTodoPrefixes)
           ? value.waitingTodoPrefixes.join("\n")
           : "",
@@ -74,8 +75,8 @@ window.__ModuleLoader__.load({
         unavailable ? h("p", { style: { color: "var(--dsw-alias-label-secondary)" } }, "宿主未暴露本设置：插件 Config 缺少 volatile 元数据，或插件未处于活动状态。")
           : busy ? h("p", { style: { color: "var(--dsw-alias-label-secondary)" } }, "正在读取配置…")
           : h(React.Fragment, null,
-            numberField("无 Todo 提示间隔", "连续多少轮没有任何 Todo 后，提示模型开始用 Todo 管理任务。", "noTodoPromptEveryNTurns", current.noTodo),
-            numberField("过期 Todo 提示间隔", "已有 Todo 列表却连续多少轮不更新后，提示模型保持列表最新。", "staleTodoPromptEveryNTurns", current.stale),
+            numberField("无 Todo 提示间隔（步）", "连续多少个 step（一次模型调用）没有任何 Todo 后，提示模型开始用 Todo 管理任务。", "noTodoPromptEveryNSteps", current.noTodo),
+            numberField("过期 Todo 提示间隔（步）", "已有 Todo 列表却连续多少个 step 不更新后，提示模型保持列表最新。", "staleTodoPromptEveryNSteps", current.stale),
             h("label", {
               "data-settings-item": "waitingTodoPrefixes",
               style: {
@@ -130,8 +131,8 @@ window.__ModuleLoader__.load({
         label: "Todo 门禁",
         keywords: "todo 待办 任务 列表 门禁 提示 过期 更新",
         items: [
-          { id: "noTodoPromptEveryNTurns", label: "无 Todo 提示间隔", desc: "连续无 Todo 后提示", keywords: "todo 待办 提示 间隔" },
-          { id: "staleTodoPromptEveryNTurns", label: "过期 Todo 提示间隔", desc: "Todo 不更新后提示", keywords: "todo 待办 过期 更新 间隔" },
+          { id: "noTodoPromptEveryNSteps", label: "无 Todo 提示间隔", desc: "连续无 Todo 的步数后提示", keywords: "todo 待办 提示 间隔 步" },
+          { id: "staleTodoPromptEveryNSteps", label: "过期 Todo 提示间隔", desc: "Todo 不更新的步数后提示", keywords: "todo 待办 过期 更新 间隔 步" },
           { id: "waitingTodoPrefixes", label: "等待用户前缀", desc: "视为等待用户的前缀", keywords: "等待 用户 前缀 确认" },
         ],
       });
