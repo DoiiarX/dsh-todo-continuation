@@ -13,9 +13,9 @@ window.__ModuleLoader__.load({
     const h = React.createElement;
 
     const NAMESPACE = "todo-continuation";
-    // 计数单位是 step（一次模型调用）：本机一轮约 16 个 step，64 步≈4 轮。
-    const DEFAULT_NO_TODO_STEPS = 64;
-    const DEFAULT_STALE_STEPS = 256;
+    // 计数单位是 step（一次模型调用）：连续 5 步没有 todo/write 就提醒。
+    const DEFAULT_NO_TODO_STEPS = 5;
+    const DEFAULT_STALE_STEPS = 20;
 
     function numberValue(value, fallback) {
       return Number.isSafeInteger(value) && value >= 1 ? value : fallback;

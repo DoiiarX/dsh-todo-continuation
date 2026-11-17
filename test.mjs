@@ -51,8 +51,8 @@ const TODO_OPEN = [{ content: '继续 B', status: 'in_progress' }]
 
 async function main() {
   // 1) 配置默认值按 step 计
-  assert.equal(Config.dict['noTodoPromptEveryNSteps'].meta.default, 64, '默认无 Todo 间隔应是 64 步')
-  assert.equal(Config.dict['staleTodoPromptEveryNSteps'].meta.default, 256, '默认过期间隔应是 256 步')
+  assert.equal(Config.dict['noTodoPromptEveryNSteps'].meta.default, 5, '默认无 Todo 间隔应是 5 步')
+  assert.equal(Config.dict['staleTodoPromptEveryNSteps'].meta.default, 20, '默认过期间隔应是 20 步')
 
   // 2) 无 Todo：累计步数跨过阈值才提示一次，且提示文案说 steps
   {

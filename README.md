@@ -14,7 +14,7 @@ DeepSeek Harness（DSH）的 Todo 门禁与提示插件：在 `agent/turn-stoppi
 
 1. **停止门禁**：当前 turn 存在未完成、且不以「等待用户」前缀开头的 todo 时，
    注入一条继续消息，让模型在同一 turn 内继续推进，而不是带着未完成项结束。
-2. **无 Todo 提示**：连续 `noTodoPromptEveryNSteps`（默认 64）个 step 没有任何 todo 快照时，
+2. **无 Todo 提示**：连续 `noTodoPromptEveryNSteps`（默认 5）个 step 没有任何 todo 快照时，
    提示模型用 `todo_write` 规划与跟踪工作。
 3. **过期 Todo 提示**：已有 todo 列表却连续 `staleTodoPromptEveryNTurns`（默认 20）
    个 step 不更新时，提示模型保持列表最新。`step` = 一次模型调用（一次请求/一次回复，
@@ -87,8 +87,8 @@ const WEB_SETTINGS_NAMESPACES = [
 | 字段 | 默认 | 含义 |
 | --- | --- | --- |
 | `waitingTodoPrefixes` | `信息不足：`、`要求用户确认：` | 未完成项以此开头时视为「等待用户」，允许结束 |
-| `noTodoPromptEveryNSteps` | 64 | 连续多少 step 无 Todo 后提示开始使用 |
-| `staleTodoPromptEveryNSteps` | 256 | 已有 Todo 却连续多少 step 不更新后提示保持最新 |
+| `noTodoPromptEveryNSteps` | 5 | 连续多少 step 无 Todo 后提示开始使用 |
+| `staleTodoPromptEveryNSteps` | 20 | 已有 Todo 却连续多少 step 不更新后提示保持最新 |
 
 ## 说明
 

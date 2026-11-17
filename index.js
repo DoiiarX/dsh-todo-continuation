@@ -25,10 +25,9 @@ export const inject = ['settings']
 
 const PLUGIN_SOURCE = { kind: 'plugin:todo-continuation' }
 const DEFAULT_WAITING_PREFIXES = ['信息不足：', '要求用户确认：']
-// 计数单位是 step（一次模型调用）。本机实测一轮约 16 个 step，
-// 所以 64 步≈4 轮、256 步≈16 轮，与旧版 5 轮/20 轮的手感接近。
-const DEFAULT_NO_TODO_EVERY_STEPS = 64
-const DEFAULT_STALE_EVERY_STEPS = 256
+// 计数单位是 step（一次模型调用）：连续 5 步没有 todo/write 就提醒。
+const DEFAULT_NO_TODO_EVERY_STEPS = 5
+const DEFAULT_STALE_EVERY_STEPS = 20
 
 /**
  * 插件配置，同时就是设置页中的 section：0.2 起 settings 段由 entry 的配置派生
